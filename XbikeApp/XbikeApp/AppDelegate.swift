@@ -6,29 +6,57 @@
 //
 
 import UIKit
+import GoogleMaps
 
-@main
+@UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {
 
-
+    var window: UIWindow?
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         // Override point for customization after application launch.
+        
+        GMSServices.provideAPIKey("AIzaSyBd7TobSF4fQGVxT3kk1panh_kKr8ZxrTI")
+        
+        window = UIWindow(frame: UIScreen.main.bounds)
+        
+        let defaults = UserDefaults.standard
+        
+        if defaults.bool(forKey: "hasOnBoarding") {
+            window?.rootViewController = UIStoryboard(name: "Tabbar", bundle: nil).instantiateInitialViewController()
+        } else {
+            window?.rootViewController = OnboardingViewController(transitionStyle: .scroll, navigationOrientation: .horizontal)
+            
+        }
+        
+        window?.makeKeyAndVisible()
+        
+        self.changeColorStatus()
+        
         return true
     }
-
-    // MARK: UISceneSession Lifecycle
-
-    func application(_ application: UIApplication, configurationForConnecting connectingSceneSession: UISceneSession, options: UIScene.ConnectionOptions) -> UISceneConfiguration {
-        // Called when a new scene session is being created.
-        // Use this method to select a configuration to create the new scene with.
-        return UISceneConfiguration(name: "Default Configuration", sessionRole: connectingSceneSession.role)
+    
+    func changeColorStatus(){
+        if #available(iOS 13, *) {
+            let statusBar = UIView(frame: (UIApplication.shared.keyWindow?.windowScene?.statusBarManager?.statusBarFrame)!)
+            statusBar.backgroundColor = UIColor.init(hex: "#FF8E25FF") ?? .orange
+            UIApplication.shared.keyWindow?.addSubview(statusBar)
+        } else {
+             // ADD THE STATUS BAR AND SET A CUSTOM COLOR
+             let statusBar: UIView = UIApplication.shared.value(forKey: "statusBar") as! UIView
+             if statusBar.responds(to:#selector(setter: UIView.backgroundColor)) {
+                statusBar.backgroundColor = #colorLiteral(red: 1, green: 0.5568627451, blue: 0.1450980392, alpha: 1)
+             }
+             UIApplication.shared.statusBarStyle = .lightContent
+        }
     }
-
-    func application(_ application: UIApplication, didDiscardSceneSessions sceneSessions: Set<UISceneSession>) {
-        // Called when the user discards a scene session.
-        // If any sessions were discarded while the application was not running, this will be called shortly after application:didFinishLaunchingWithOptions.
-        // Use this method to release any resources that were specific to the discarded scenes, as they will not return.
+    
+    func loadTabBar(){
+        let defaults = UserDefaults.standard
+        defaults.set(true, forKey: "hasOnBoarding")
+        window?.rootViewController = UIStoryboard(name: "Tabbar", bundle: nil).instantiateInitialViewController()
+        window?.makeKeyAndVisible()
+        changeColorStatus()
     }
 
 
